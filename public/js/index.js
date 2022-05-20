@@ -235,6 +235,9 @@ $(document).ready(function(){
     if (!authedUser) return;
     const id = $('.offcanvas-content').attr('content_id');
 
+    let contentUser = contentData[id];
+    if (contentUser.user.toLowerCase() !== authedUser.toLowerCase()) return;
+
     if(!confirm('Are you sure you want to delete this pic?')) return;
 
     $(document).off('click');
@@ -383,13 +386,17 @@ $(document).ready(function(){
     // Append Images & save to contentData
     for (let i = 0; i < dataObj.pics.length; i++) {
       const data = dataObj.pics[i];
+
+      let avatarD = dataObj.hasOwnProperty('avatar') ? dataObj.avatar : data.avatar,
+      userD = dataObj.hasOwnProperty('username') ? dataObj.username : data.user;
+
       contentData[data._id] = {
-        avatar: data.avatar,
+        avatar: avatarD,
         picDesc: data.picDesc,
         picUrl: data.picUrl,
         starred: data.starred,
         uploaded_on: data.uploaded_on,
-        user: data.user
+        user: userD
       };
 
       $('.content').append(`
@@ -400,6 +407,8 @@ $(document).ready(function(){
       </div>
       `);
     }
+
+    
 
     $('.content-img').on('error', e => {
       $(e.target)
@@ -435,7 +444,6 @@ $(document).ready(function(){
 
       if (authedUser) {
         $('#starPic').attr('class', '');
-        $('#deletePic').attr('class', '');
 
         if (userData[authedUser].picStarred.includes(itemId)) {
           $('#starPic i').attr('class', 'fa-solid fa-star');
@@ -445,7 +453,10 @@ $(document).ready(function(){
           $('.star-status').text('Star');
         }
 
-        $('#deletePic').css('display', 'block');
+        if (username.toLowerCase() === authedUser.toLowerCase()) {
+          $('#deletePic').attr('class', '');
+          $('#deletePic').css('display', 'block');
+        }
       }
 
       $('.offcanvas-content').attr('content_id', itemId);

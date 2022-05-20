@@ -140,7 +140,8 @@ router.route('/')
     
   })
   .delete(async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    //if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    let userid = 83095832;
 
     let id = req.body.id;
     
@@ -151,6 +152,14 @@ router.route('/')
     }
 
     try {
+
+      const picData = await PicModel.findById(id, { '__v': 0 }).lean();
+      const reqUserData = await UserModel.find({ id: userid }).lean();
+      if (picData == null) return res.status(404).json({ error: 'not found' });
+      if (reqUserData[0].username.toLowerCase() !== picData.user.toLowerCase()) {
+        return res.status(403).json({ error: 'cannot delete pic (forbidden)' });
+      }
+
       const userData = await UserModel.find({});
       
       for (let i = 0; i < userData.length; i++) {
