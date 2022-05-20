@@ -125,6 +125,7 @@ $(document).ready(function(){
       error: resp => {
         const errMsg = resp.responseJSON.error;
         alert(errMsg);
+        location.reload();
       }
     });
   });
@@ -264,6 +265,7 @@ $(document).ready(function(){
       error: resp => {
         const errMsg = resp.responseJSON.error;
         alert(`Could not delete: ${errMsg}`);
+        location.reload();
       }
     });
 
@@ -516,6 +518,7 @@ $(document).ready(function(){
       default: 
         alert('POST request failed:\n' + errMsg);
     }
+    location.reload();
   }
 
   
