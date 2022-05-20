@@ -232,7 +232,6 @@ $(document).ready(function(){
     
   });
 
-  // quietRender - only for updated info (stars, description)
   function renderPics(isAll = true, user = '') {
     $('.content').css('display', 'none');
     $('.content').empty();

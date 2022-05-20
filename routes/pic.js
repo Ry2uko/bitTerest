@@ -7,15 +7,49 @@ import express from 'express';
 const router = express.Router();
 
 router.route('/')
-  .get(getUserData, async (req, res) => {
-    let userData = res.locals.userData 
-    ? res.locals.userData[0] : null, pics;
-;
-    try {
-      pics = await PicModel.find({}, { '__v': 0 }).lean();
-    } catch(err) {
-      return res.status(500).json({ error: err.message });
+  .get(getUserData, async (req, res) => {2
+
+    let starredFilter = req.query.starred, // must be authenticated
+    idFilter = req.query.id,
+    userData = res.locals.userData 
+    ? res.locals.userData[0] : null,
+    pics;
+
+    if (idFilter !== undefined) {
+      try {
+        pics = await PicModel.findById({ _id: idFilter }, { '__v': 0});
+
+        if (pics == null) return res.status(404).json({ error: 'not found' });
+
+        pics = [ pics ];
+      } catch (err) {
+        return res.status(400).json({ error: 'invalid id' });
+      }
+    } else {
+      try {
+        pics = await PicModel.find({}, { '__v': 0 }).lean();
+      } catch(err) {
+        return res.status(500).json({ error: err.message });
+      }
     }
+    
+    if (starredFilter !== undefined) {
+      if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+      if (starredFilter === 'true' || starredFilter === true) {
+        const userData = await UserModel.find({ 'id': req.user }).lean();
+        let picStarred = userData[0].picStarred;
+
+        pics = pics.filter(pic => {
+          return picStarred.includes(pic._id.toString());
+        });
+
+      } else {
+        return res.status(400).json({ error: 'invalid (starred) filter'});
+      }
+      
+    }
+
     const total_pics = pics.length;
     return userData ? res.status(200).json({
       user: {
@@ -106,6 +140,39 @@ router.route('/')
     
   })
   .delete(async (req, res) => {
+    //if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    let userid = '83095832';
+    let id = req.body.id;
+    
+    if (id === undefined) {
+      return res.status(400).json({ error: 'missing id' });
+    } else if (!id) {
+      return res.status(400).json({ error: 'invalid id' });
+    }
+
+    try {
+      const userData = await UserModel.find({});
+      
+      for (let i = 0; i < userData.length; i++) {
+        if (userData[i].id === userid) {
+          userData[i].uploaded_count -= 1;
+        }
+        if (userData[i].picStarred.includes(id)) {
+          let index = userData[i].picStarred.indexOf(id);
+          userData[i].picStarred.splice(index, 1);
+        }
+      }
+
+      userData.forEach(async (doc) => {
+        await UserModel.findByIdAndUpdate(doc._id, doc);
+      });
+      await PicModel.findByIdAndDelete(id);
+
+      return res.status(200).json({ success: 'successfully deleted' });
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
     return res.send();
   });
 
