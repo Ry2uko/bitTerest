@@ -317,8 +317,17 @@ div.offcanvas-content div.occ-info div.occ-controls button#starPic span#occ-star
   color: #d00000;
 }
 
+div.offcanvas-content div.occ-info div.occ-controls button#deletePic {
+  display: none;
+}
+
 div.offcanvas-content div.occ-info div.occ-controls button#deletePic i {
   color: rgba(239, 35, 60, 0.865);
+}
+
+div.offcanvas-content div.occ-info div.occ-controls button#deletePic.disabled {
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 div.offcanvas-content button#closeOccContent {

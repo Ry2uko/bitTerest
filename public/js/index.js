@@ -160,7 +160,7 @@ $(document).ready(function(){
 
   // Offcanvas Content
   const OccContent = {
-    open: transitionMs => {
+    open: (transitionMs, cbFn) => {
       if ($('.offcanvas-content').css('display') !== 'none') return;
 
       $('.content-wrapper').css('pointerEvents', 'none').animate({
@@ -176,9 +176,9 @@ $(document).ready(function(){
             OccContent.close(120);
           }
         });
-      }); 
+      }, cbFn); 
     },
-    close: transitionMs => {
+    close: (transitionMs, cbFn) => {
       if ($('.offcanvas-content').css('display') === 'none') return;
 
       $(document).off('click');
@@ -188,13 +188,13 @@ $(document).ready(function(){
         $('.content-wrapper').click();
       });
 
-      $('.offcanvas-content').fadeOut(transitionMs);
+      $('.offcanvas-content').fadeOut(transitionMs, cbFn);
     }
   };
   $('#closeOccContent').on('click', () => OccContent.close(120));
-  $('#starPic').on('click', e => {
+  $('#starPic').on('click', () => {
     if (!authedUser) return;
-    const id = $(e.target).parents('.offcanvas-content').attr('content_id'),
+    const id = $('.offcanvas-content').attr('content_id'),
     starred = !($('#starPic i').attr('class') === 'fa-solid fa-star');
 
     let starCount = parseInt($('#occ-stars span').text());
@@ -231,7 +231,41 @@ $(document).ready(function(){
     });
     
   });
+  $('#deletePic').on('click', () => {
+    if (!authedUser) return;
+    const id = $('.offcanvas-content').attr('content_id');
 
+    if(!confirm('Are you sure you want to delete this pic?')) return;
+
+    $(document).off('click');
+    $('body').css('pointerEvents', 'none').animate({ 'opacity': 0.67 }, 650);
+    
+    $.ajax({
+      method: 'DELETE',
+      url: '/api/pic',
+      data: { id },
+      success: () => {
+        OccContent.close(400, () => {
+
+          if ($('#myPics a').attr('class') === 'selected' || $('#ocMyPics').attr('class') === 'selected') {
+            renderPics(false, `/${authedUser}`);
+          } else {
+            renderPics();
+          }
+
+          $('body').animate({ 'opacity': 1 }, 650, () => {
+            $('body').css('pointerEvents', 'auto');
+          });
+        });
+      },
+      error: resp => {
+        const errMsg = resp.responseJSON.error;
+        alert(`Could not delete: ${errMsg}`);
+      }
+    });
+
+  });
+  
   function renderPics(isAll = true, user = '') {
     $('.content').css('display', 'none');
     $('.content').empty();
@@ -401,6 +435,8 @@ $(document).ready(function(){
 
       if (authedUser) {
         $('#starPic').attr('class', '');
+        $('#deletePic').attr('class', '');
+
         if (userData[authedUser].picStarred.includes(itemId)) {
           $('#starPic i').attr('class', 'fa-solid fa-star');
           $('.star-status').text('Starred');          
@@ -408,6 +444,8 @@ $(document).ready(function(){
           $('#starPic i').attr('class', 'fa-regular fa-star');
           $('.star-status').text('Star');
         }
+
+        $('#deletePic').css('display', 'block');
       }
 
       $('.offcanvas-content').attr('content_id', itemId);

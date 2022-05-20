@@ -140,8 +140,8 @@ router.route('/')
     
   })
   .delete(async (req, res) => {
-    //if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    let userid = '83095832';
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
     let id = req.body.id;
     
     if (id === undefined) {
@@ -154,7 +154,7 @@ router.route('/')
       const userData = await UserModel.find({});
       
       for (let i = 0; i < userData.length; i++) {
-        if (userData[i].id === userid) {
+        if (userData[i].id === req.user) {
           userData[i].uploaded_count -= 1;
         }
         if (userData[i].picStarred.includes(id)) {
