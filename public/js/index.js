@@ -6,11 +6,13 @@ $(document).ready(function(){
   currRendered = '', // GLOBAL, USER1 (self), STARRED, USER2 (other)
   userTwoRendered = '';
 
+  let renderLock = false;
+
   renderPics();
 
   // Toggling between all and user's pics
   $('#allPics a').on('click', () => {
-    if (currRendered === 'GLOBAL' || !authedUser) return;
+    if (currRendered === 'GLOBAL' || renderLock) return;
 
     $('#myPics a').attr('class', '');
     $('#allPics a').attr('class', 'selected');
@@ -21,7 +23,7 @@ $(document).ready(function(){
     renderPics();
   });
   $('#myPics a').on('click', () => {
-    if (currRendered === 'USER1' || !authedUser) return;
+    if (currRendered === 'USER1' || !authedUser || renderLock) return;
 
     $('#allPics a').attr('class', '');
     $('#myPics a').attr('class', 'selected');
@@ -32,7 +34,7 @@ $(document).ready(function(){
     renderPics(false, `/${authedUser}`);
   });
   $('#ocAllPics').on('click', () => {
-    if (currRendered === 'GLOBAL' || !authedUser) return;
+    if (currRendered === 'GLOBAL' || renderLock) return;
 
     $('#ocMyPics').removeClass('selected');
     $('#ocAllPics').addClass('selected');
@@ -43,7 +45,7 @@ $(document).ready(function(){
     renderPics();
   });
   $('#ocMyPics').on('click', () => {
-    if (currRendered === 'USER1' || !authedUser) return;
+    if (currRendered === 'USER1' || !authedUser || renderLock) return;
 
     $('#ocAllPics').removeClass('selected');
     $('#ocMyPics').addClass('selected');
@@ -138,10 +140,9 @@ $(document).ready(function(){
       }
     });
   }); 
-  let renderLock = false;
+  
   $('#userStarredPics').on('click', () => {
-    if (renderLock || !authedUser) return;
-    renderLock = true;
+    if (currRendered === 'STARRED' || renderLock || !authedUser) return;
 
     $('#myPics a').attr('class', '');
     $('#allPics a').attr('class', '');
@@ -295,11 +296,29 @@ $(document).ready(function(){
     });
 
   });
+  $('#occ-username').on('click', e => {
+    if (renderLock || currRendered === 'USER2') return;
+    let username = $(e.target).text().toLowerCase();
+
+    $('#myPics a').attr('class', '');
+    $('#allPics a').attr('class', '');
+    $('#ocMyPics').removeClass('selected');
+    $('#ocAllPics').removeClass('selected');
+
+    currRendered = 'USER2';
+    userTwoRendered = username;
+     
+    OccContent.close(400, () => {
+      renderPics(false, `/${userTwoRendered}`);
+    });
+  });
   
   function renderPics(isAll = true, user = '', cstRoute) {
     $('.content').css('display', 'none');
     $('.content').empty();
     $('.loading').css('display', 'flex');
+
+    renderLock = true;
 
     try {
       let ajaxRoute;
