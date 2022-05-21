@@ -189,7 +189,13 @@ $(document).ready(function(){
         $('.content-wrapper').click();
       });
 
-      $('.offcanvas-content').fadeOut(transitionMs, cbFn);
+      $('.offcanvas-content').fadeOut(transitionMs, () => {
+        $('#starPic').attr('class', 'disabled');
+        $('#deletePic')
+        .attr('class', 'disabled')
+        .css('display', 'none');
+        if (cbFn) cbFn();
+      });
     }
   };
   $('#closeOccContent').on('click', () => OccContent.close(120));
@@ -265,7 +271,6 @@ $(document).ready(function(){
       error: resp => {
         const errMsg = resp.responseJSON.error;
         alert(`Could not delete: ${errMsg}`);
-        location.reload();
       }
     });
 
@@ -307,7 +312,7 @@ $(document).ready(function(){
       url: '/api/pic',
       data: { picUrl, picDesc },
       success: handlePostSuccess,
-      error: handlePostError
+      error: resp => { handlePostError(resp, evnt); }
     });
 
   }
@@ -441,8 +446,6 @@ $(document).ready(function(){
     $('.content-item').on('click', e => {
       const itemId = $(e.target).parents('.content-item').attr('item_id');
       const content = contentData[itemId];
-      let avatar = dataObj.hasOwnProperty('avatar') ? dataObj.avatar : userData[content.user].avatar,
-      username = dataObj.hasOwnProperty('username') ? dataObj.username : content.user;
 
       if (authedUser) {
         $('#starPic').attr('class', '');
@@ -454,17 +457,18 @@ $(document).ready(function(){
           $('#starPic i').attr('class', 'fa-regular fa-star');
           $('.star-status').text('Star');
         }
-
-        if (username.toLowerCase() === authedUser.toLowerCase()) {
-          $('#deletePic').attr('class', '');
-          $('#deletePic').css('display', 'block');
+        console.log([dataObj, content])
+        if (content.user.toLowerCase() === authedUser.toLowerCase()) {
+          $('#deletePic')
+          .attr('class', '')
+          .css('display', 'block');
         }
       }
 
       $('.offcanvas-content').attr('content_id', itemId);
       $('#occ-pic').attr('src', content.picUrl);
-      $('#occ-avatar').attr('src', avatar);
-      $('#occ-username').text(username);
+      $('#occ-avatar').attr('src', userData[content.user].avatar);
+      $('#occ-username').text(content.user);
       $('#occ-stars span').text(content.starred);
       $('#occ-date span').text(content.uploaded_on);
       $('#occ-description span').text(content.picDesc);
@@ -495,9 +499,9 @@ $(document).ready(function(){
     
     submitLock = false;
   }
-  function handlePostError(resp) {
+  function handlePostError(resp, evnt) {
     const displayErr = msg => {
-      switch($(evnt.target).attr('id')) {
+      switch($(evnt.target).parents('form').attr('id')) {
         case 'dd-form':
           $('.err-msg').text(msg);
           break;
@@ -507,6 +511,7 @@ $(document).ready(function(){
     }
 
     const errMsg = resp.responseJSON.error;
+
     switch(resp.status) {
       case 400:
       case 401:
@@ -518,7 +523,8 @@ $(document).ready(function(){
       default: 
         alert('POST request failed:\n' + errMsg);
     }
-    location.reload();
+
+    submitLock = false;
   }
 
   
