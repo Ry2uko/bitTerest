@@ -1,46 +1,55 @@
 $(document).ready(function(){
 
-  let authedUser = '', contentData = {}, userData = {};
+  let authedUser = '', 
+  contentData = {}, 
+  userData = {},
+  currRendered = '', // GLOBAL, USER1 (self), STARRED, USER2 (other)
+  userTwoRendered = '';
+
   renderPics();
 
   // Toggling between all and user's pics
   $('#allPics a').on('click', () => {
-    if ($('#allPics a').attr('class') === 'selected' || !authedUser) return;
+    if (currRendered === 'GLOBAL' || !authedUser) return;
 
     $('#myPics a').attr('class', '');
     $('#allPics a').attr('class', 'selected');
     $('#ocMyPics').removeClass('selected');
     $('#ocAllPics').addClass('selected');
+    currRendered = 'GLOBAL';
 
     renderPics();
   });
   $('#myPics a').on('click', () => {
-    if ($('#myPics a').attr('class') === 'selected' || !authedUser) return;
+    if (currRendered === 'USER1' || !authedUser) return;
 
     $('#allPics a').attr('class', '');
     $('#myPics a').attr('class', 'selected');
     $('#ocAllPics').removeClass('selected');
     $('#ocMyPics').addClass('selected');
+    currRendered = 'USER1';
 
     renderPics(false, `/${authedUser}`);
   });
   $('#ocAllPics').on('click', () => {
-    if ($('#ocAllPics').hasClass('selected') || !authedUser) return;
+    if (currRendered === 'GLOBAL' || !authedUser) return;
 
     $('#ocMyPics').removeClass('selected');
     $('#ocAllPics').addClass('selected');
     $('#myPics a').attr('class', '');
     $('#allPics a').attr('class', 'selected');
+    currRendered = 'GLOBAL';
 
     renderPics();
   });
   $('#ocMyPics').on('click', () => {
-    if ($('#ocMyPics').hasClass('selected') || !authedUser) return;
+    if (currRendered === 'USER1' || !authedUser) return;
 
     $('#ocAllPics').removeClass('selected');
     $('#ocMyPics').addClass('selected');
     $('#allPics a').attr('class', '');
     $('#myPics a').attr('class', 'selected');
+    currRendered = 'USER1';
 
     renderPics(false, `/${authedUser}`);
   });
@@ -100,7 +109,7 @@ $(document).ready(function(){
   $('#dd-form').on('submit', e => e.preventDefault());
   $('#oc-dd-form').on('submit', e => e.preventDefault());
 
-  // Github auth / logout
+  // Github auth / dd-profile
   let authLock = false;
   $('#logBtn').on('click', () => {
     if (authLock || authedUser) return;
@@ -127,6 +136,21 @@ $(document).ready(function(){
         alert(errMsg);
         location.reload();
       }
+    });
+  }); 
+  let renderLock = false;
+  $('#userStarredPics').on('click', () => {
+    if (renderLock || !authedUser) return;
+    renderLock = true;
+
+    $('#myPics a').attr('class', '');
+    $('#allPics a').attr('class', '');
+    $('#ocMyPics').removeClass('selected');
+    $('#ocAllPics').removeClass('selected');
+
+    currRendered = 'STARRED';
+    $('.user-dd-content').slideUp(325, () => {
+      renderPics(true, '', '/api/pic?starred=true');
     });
   });
 
@@ -257,11 +281,7 @@ $(document).ready(function(){
       success: () => {
         OccContent.close(400, () => {
 
-          if ($('#myPics a').attr('class') === 'selected' || $('#ocMyPics').attr('class') === 'selected') {
-            renderPics(false, `/${authedUser}`);
-          } else {
-            renderPics();
-          }
+          renderWhich();
 
           $('body').animate({ 'opacity': 1 }, 650, () => {
             $('body').css('pointerEvents', 'auto');
@@ -276,7 +296,7 @@ $(document).ready(function(){
 
   });
   
-  function renderPics(isAll = true, user = '') {
+  function renderPics(isAll = true, user = '', cstRoute) {
     $('.content').css('display', 'none');
     $('.content').empty();
     $('.loading').css('display', 'flex');
@@ -284,7 +304,11 @@ $(document).ready(function(){
     try {
       let ajaxRoute;
 
-      ajaxRoute = isAll ? '/api/pic' : `/api/user${user}`;
+      if (cstRoute) {
+        ajaxRoute = cstRoute;
+      } else {
+        ajaxRoute = isAll ? '/api/pic' : `/api/user${user}`;
+      }
 
       $.ajax({ 
         url: ajaxRoute, 
@@ -295,7 +319,7 @@ $(document).ready(function(){
           $('.content')
           .empty()
           .isotope()
-          .isotope('destroy');
+          .isotope('destroy');  
         }
       });
 
@@ -415,8 +439,6 @@ $(document).ready(function(){
       `);
     }
 
-    
-
     $('.content-img').on('error', e => {
       $(e.target)
       .attr('prev_src', $(e.target).attr('src'))
@@ -476,6 +498,7 @@ $(document).ready(function(){
       OccContent.open(220);
     });
 
+    renderLock = false;
   }
 
   function handlePostSuccess() {
@@ -491,11 +514,7 @@ $(document).ready(function(){
       toggleFormContainer('.oc-dd-form-container');
     }
 
-    if ($('#myPics a').attr('class') === 'selected' || $('#ocMyPics').attr('class') === 'selected') {
-      renderPics(false, `/${authedUser}`);
-    } else {
-      renderPics();
-    }
+    renderWhich();
     
     submitLock = false;
   }
@@ -526,6 +545,22 @@ $(document).ready(function(){
 
     submitLock = false;
   }
-
   
+  function renderWhich() {
+    switch(currRendered) {
+      case 'USER1':
+        renderPics(false, `/${authedUser.toLowerCase()}`);
+        break;
+      case 'USER2':
+        renderPics(false, `/${userTwoRendered.toLowerCase()}`);
+        break;
+      case 'STARRED':
+        renderPics(true, '', '/api/pic?starred=true');
+        break;
+
+      default:
+        renderPics();
+    }
+  }
+
 });

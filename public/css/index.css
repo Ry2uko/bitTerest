@@ -135,6 +135,10 @@ div.offcanvas-nav ul.oc-nav-list div.oc-dd-form-container input.oc-form-submit-b
   font-size: 1.2rem;
 }
 
+div.offcanvas-nav ul.oc-nav-list div.oc-dd-form-container input.oc-form-submit-btn:focus {
+  outline: none;
+}
+
 div.offcanvas-nav button#ocLogBtn {
   margin: auto 0 4px 0;
   background-color: #9b0106;
@@ -543,6 +547,10 @@ div.dd-container div.dd-form-container form#dd-form input.form-submit-btn {
 
 div.dd-container div.dd-form-container form#dd-form input.form-submit-btn:hover {
   background-color: #e19d9d;
+}
+
+div.dd-container div.dd-form-container form#dd-form input.form-submit-btn:focus {
+  outline: none;
 }
 
 div.user-dd-container {
