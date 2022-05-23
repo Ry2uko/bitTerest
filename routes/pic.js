@@ -92,6 +92,8 @@ router.route('/')
     starred = req.body.starred,
     picDesc = req.body.picDesc;
 
+    const MAXDESCLEN = 120;
+
     if (starred === 'true') starred = true;
     else if (starred === 'false') starred = false;
 
@@ -107,6 +109,8 @@ router.route('/')
       return res.status(400).json({ error: 'invalid starred' });
     } else if (picDesc !== undefined && typeof picDesc !== 'string') {
       return res.status(400).json({ error: 'invalid picDesc' });
+    } else if (picDesc !== undefined && picDesc.length > MAXDESCLEN) {
+      return res.status(400).json({ error: `picDesc must not be greater than ${MAXDESCLEN} characters`});
     }
 
     try {

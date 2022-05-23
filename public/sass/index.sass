@@ -162,7 +162,7 @@ div
           width: 100%
           max-width: 600px
           max-height: 845px
-          min-height: 240px
+          min-height: 300px
           border-radius: 0.3rem
 
       &.occ-info
@@ -194,11 +194,59 @@ div
                 outline: none
           
           &.occ-pgs
-            div.stars-date
-              display: flex
-              color: rgba(255, 255, 255, 0.851)
-              font-size: 1.22rem
+            div
+              &.stars-date
+                display: flex
+                color: rgba(255, 255, 255, 0.851)
+                font-size: 1.22rem
+              
+              &.de-container
+                display: none
+                margin: 15px 0
+                width: 560px
 
+                textarea#descEditInput
+                  width: 100%
+                  resize: none
+                  height: 140px
+                  background-color: #181C35
+                  border: 1px solid #464D60
+                  color: #f2f4f9
+                  padding: 7px
+                  border-radius: 0.3rem
+                  word-break: break-word
+
+                  font:
+                    family: 'Barlow', sans-serif
+                    size: 1.25rem
+
+                  &:focus
+                    outline: none
+
+                div.de-controls
+                  width: 100%
+                  display: flex
+                  justify-content: right
+                  margin-top: 8px
+
+                button
+                  border-radius: 0.2rem
+                  cursor: pointer
+                  padding: 3px 15px
+                  margin: 0 3px
+                  font:
+                    family: 'Barlow', sans-serif
+                    size: 1.1rem
+
+                  &#deCancel
+                    border: 1px solid #8b949e67
+                    color: #f6fafed3
+                    background-color: rgba(28, 32, 58, 0.806)
+
+                  &#deSave
+                    background-color: rgb(33, 136, 56)
+                    border: 1px solid rgb(30, 126, 52)
+                    color: #fff
             p
               &#occ-stars
                 margin-right: 15px
@@ -218,10 +266,15 @@ div
               
               &#occ-description
                 color: rgba(255, 255, 255, 0.937)
+                width: 560px
+                max-height: 140px
+                overflow: auto
+                word-break: break-word
                 font-size: 1.35rem
-                margin: 30px 0
+                margin: 15px 0
             
             button#editDesc
+              display: none
               border: none
               background-color: inherit
               color: $magma
@@ -234,7 +287,7 @@ div
             position: absolute
             bottom: 0
             left: 0
-            margin-bottom: 2rem
+            margin-bottom: 1rem
 
             button
               border: 1px solid #8b949e67
@@ -276,10 +329,6 @@ div
 
                 i
                   color: rgba(239, 35, 60, 0.865)
-                
-                &.disabled
-                  pointer-events: none
-                  opacity: 0.7
 
     button#closeOccContent
       background-color: inherit

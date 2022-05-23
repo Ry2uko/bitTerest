@@ -180,7 +180,7 @@ div.offcanvas-content div.occ-pic-container img#occ-pic {
   width: 100%;
   max-width: 600px;
   max-height: 845px;
-  min-height: 240px;
+  min-height: 300px;
   border-radius: 0.3rem;
 }
 
@@ -230,6 +230,62 @@ div.offcanvas-content div.occ-info div.occ-pgs div.stars-date {
   font-size: 1.22rem;
 }
 
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container {
+  display: none;
+  margin: 15px 0;
+  width: 560px;
+}
+
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container textarea#descEditInput {
+  width: 100%;
+  resize: none;
+  height: 140px;
+  background-color: #181C35;
+  border: 1px solid #464D60;
+  color: #f2f4f9;
+  padding: 7px;
+  border-radius: 0.3rem;
+  word-break: break-word;
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.25rem;
+}
+
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container textarea#descEditInput:focus {
+  outline: none;
+}
+
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container div.de-controls {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: right;
+      -ms-flex-pack: right;
+          justify-content: right;
+  margin-top: 8px;
+}
+
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container button {
+  border-radius: 0.2rem;
+  cursor: pointer;
+  padding: 3px 15px;
+  margin: 0 3px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.1rem;
+}
+
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container button#deCancel {
+  border: 1px solid #8b949e67;
+  color: #f6fafed3;
+  background-color: rgba(28, 32, 58, 0.806);
+}
+
+div.offcanvas-content div.occ-info div.occ-pgs div.de-container button#deSave {
+  background-color: #218838;
+  border: 1px solid #1e7e34;
+  color: #fff;
+}
+
 div.offcanvas-content div.occ-info div.occ-pgs p#occ-stars {
   margin-right: 15px;
   display: -webkit-box;
@@ -255,11 +311,16 @@ div.offcanvas-content div.occ-info div.occ-pgs p#occ-date span {
 
 div.offcanvas-content div.occ-info div.occ-pgs p#occ-description {
   color: rgba(255, 255, 255, 0.937);
+  width: 560px;
+  max-height: 140px;
+  overflow: auto;
+  word-break: break-word;
   font-size: 1.35rem;
-  margin: 30px 0;
+  margin: 15px 0;
 }
 
 div.offcanvas-content div.occ-info div.occ-pgs button#editDesc {
+  display: none;
   border: none;
   background-color: inherit;
   color: #d00000;
@@ -275,7 +336,7 @@ div.offcanvas-content div.occ-info div.occ-controls {
   position: absolute;
   bottom: 0;
   left: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 div.offcanvas-content div.occ-info div.occ-controls button {
@@ -327,11 +388,6 @@ div.offcanvas-content div.occ-info div.occ-controls button#deletePic {
 
 div.offcanvas-content div.occ-info div.occ-controls button#deletePic i {
   color: rgba(239, 35, 60, 0.865);
-}
-
-div.offcanvas-content div.occ-info div.occ-controls button#deletePic.disabled {
-  pointer-events: none;
-  opacity: 0.7;
 }
 
 div.offcanvas-content button#closeOccContent {

@@ -216,9 +216,16 @@ $(document).ready(function(){
 
       $('.offcanvas-content').fadeOut(transitionMs, () => {
         $('#starPic').attr('class', 'disabled');
-        $('#deletePic')
-        .attr('class', 'disabled')
-        .css('display', 'none');
+        $('#deletePic').css('display', 'none');
+        $('#editDesc').css('display', 'none');
+
+        $('#occ-description').css('display', 'block')
+        $('.de-container').css('display', 'none');
+        $('#descEditInput').val('');
+
+        $('#deCancel').off('click');
+        $('#deSave').off('click');
+
         if (cbFn) cbFn();
       });
     }
@@ -296,9 +303,16 @@ $(document).ready(function(){
     });
 
   });
-  $('#occ-username').on('click', e => {
+  $('#occ-username').on('click', () => {
     if (renderLock || currRendered === 'USER2') return;
-    let username = $(e.target).text().toLowerCase();
+    let username = $('#occ-username').text().toLowerCase();
+
+    if (authedUser) {
+      if (username === authedUser.toLowerCase()) {
+        $('#myPics a').click();
+        return;
+      }
+    }
 
     $('#myPics a').attr('class', '');
     $('#allPics a').attr('class', '');
@@ -312,7 +326,64 @@ $(document).ready(function(){
       renderPics(false, `/${userTwoRendered}`);
     });
   });
-  
+  $('#editDesc').on('click', () => {
+    if (!authedUser) return;
+    const id = $('.offcanvas-content').attr('content_id');
+    
+    let contentUser = contentData[id];
+    if (contentUser.user.toLowerCase() !== authedUser.toLowerCase()) return;
+    
+    const descVal = contentUser.picDesc;
+    $('#occ-description').css('display', 'none')
+    $('.de-container').css('display', 'block');
+
+    $('#descEditInput').val(descVal).focus();
+
+    $('#deCancel').on('click', () => {
+      $('#occ-description').css('display', 'block')
+      $('.de-container').css('display', 'none');
+      $('#descEditInput').val('');
+
+      $('#deCancel').off('click');
+      $('#deSave').off('click');
+    });
+
+    $('#deSave').on('click', () => {
+      const picDesc = $('#descEditInput').val();
+      $('#occ-description span').text(picDesc);
+      contentUser.picDesc = picDesc;
+
+      $('#occ-description').css('display', 'block')
+      $('.de-container').css('display', 'none');
+
+      $('#deCancel').off('click');
+      $('#deSave').off('click');
+
+      $('#deSave').css('pointerEvents', 'none');
+      $('#deCancel').css('pointerEvents', 'none');
+
+      $.ajax({
+        method: 'PUT',
+        url: '/api/pic',
+        data: { id, picDesc },
+        success: () => {
+          $('#deSave').css('pointerEvents', 'auto');
+          $('#deCancel').css('pointerEvents', 'auto');
+
+          $('#descEditInput').val('');
+        },
+        error: resp => {
+          const errMsg = resp.responseJSON.error;
+          alert(`Couldn't save: ${errMsg}`);
+        }
+      });
+
+     
+
+    });
+
+  });
+
   function renderPics(isAll = true, user = '', cstRoute) {
     $('.content').css('display', 'none');
     $('.content').empty();
@@ -436,17 +507,14 @@ $(document).ready(function(){
     // Append Images & save to contentData
     for (let i = 0; i < dataObj.pics.length; i++) {
       const data = dataObj.pics[i];
-
-      let avatarD = dataObj.hasOwnProperty('avatar') ? dataObj.avatar : data.avatar,
-      userD = dataObj.hasOwnProperty('username') ? dataObj.username : data.user;
+      const dataObjUser = dataObj.hasOwnProperty('username') ? dataObj.username : data.user;
 
       contentData[data._id] = {
-        avatar: avatarD,
         picDesc: data.picDesc,
         picUrl: data.picUrl,
         starred: data.starred,
         uploaded_on: data.uploaded_on,
-        user: userD
+        user: dataObjUser
       };
 
       $('.content').append(`
@@ -498,11 +566,10 @@ $(document).ready(function(){
           $('#starPic i').attr('class', 'fa-regular fa-star');
           $('.star-status').text('Star');
         }
-        console.log([dataObj, content])
+
         if (content.user.toLowerCase() === authedUser.toLowerCase()) {
-          $('#deletePic')
-          .attr('class', '')
-          .css('display', 'block');
+          $('#deletePic').css('display', 'block');
+          $('#editDesc').css('display', 'unset');
         }
       }
 
